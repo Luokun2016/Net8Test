@@ -1,0 +1,16 @@
+﻿################################################################################
+# 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
+################################################################################
+
+/BenchmarksTest/BenchmarkDotNet.Artifacts/results
+/BenchmarksTest/BenchmarkDotNet.Artifacts/snapshots
+/BenchmarksTest/BenchmarkDotNet.Artifacts
+/BenchmarksTest/obj
+/BrotliUtility/bin
+/BrotliUtility/obj
+/BrotliUtility/publish
+/ConsoleApp1/obj
+/TagParseUtility/bin
+/TagParseUtility/obj
+/Test/bin
+/Test/obj
