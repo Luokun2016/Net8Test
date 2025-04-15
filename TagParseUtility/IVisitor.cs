@@ -1,4 +1,6 @@
-﻿using TagParseUtility.TagDefine;
+﻿using System;
+using System.Collections.Generic;
+using TagParseUtility.TagDefine;
 
 namespace TagParseUtility
 {
