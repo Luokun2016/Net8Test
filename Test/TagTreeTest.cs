@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagParseUtility;
+using TagParseUtility.NodeParse;
 
 namespace Test
 {
@@ -19,7 +20,7 @@ namespace Test
             foreach (var node in tree.AllTagNodes)
             {
                 Console.WriteLine($"Tage: {node.Name}");
-                Console.WriteLine(string.Join(",", tree.GetTagPaths(node)));
+                Console.WriteLine(string.Join(",", tree.GetTagInfos(node, new TagInfoVisitor()).Select(p => p.TagPath)));
             }
 
             Console.WriteLine("Tag6 :{0}", tree.IsVaildPath("Tag6"));
@@ -29,7 +30,7 @@ namespace Test
             Console.WriteLine("Tag3 :{0}", tree.IsVaildPath("Tag3"));
             Console.WriteLine("Tag2[2] :{0}", tree.IsVaildPath("Tag2[2]"));
 
-            var searchPath = tree.SearchTagPath(new TagParseUtility.NodeParse.TagSearchArg
+            var searchPath = tree.SearchTagPath(new TagSearchArg
             {
                 TagName = "Tag4",
                 FsuType = "bool"

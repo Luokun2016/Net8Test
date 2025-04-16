@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TagParseUtility.NodeParse;
 using TagParseUtility.TagDefine;
 
 namespace TagParseUtility.Utilities
@@ -68,5 +70,79 @@ namespace TagParseUtility.Utilities
             return true;
         }
 
+        public static List<PathSegment> Parse(string path)
+        {
+            var segments = new List<string>();
+            var buffer = new List<char>();
+            var inBracket = false;
+            var bracketBuffer = new List<char>();
+
+            foreach (var c in path)
+            {
+                if (c == '[')
+                {
+                    // 遇到左括号，开始收集索引段
+                    if (buffer.Count > 0)
+                    {
+                        segments.Add(new string(buffer.ToArray()));
+                        buffer.Clear();
+                    }
+                    inBracket = true;
+                    bracketBuffer.Clear();
+                }
+                else if (c == ']')
+                {
+                    // 遇到右括号，结束索引段并处理
+                    if (inBracket)
+                    {
+                        // 将冒号替换为逗号，并包装成 [1,2,3] 格式
+                        segments.Add($"[{new string(bracketBuffer.ToArray())}]");
+                        bracketBuffer.Clear();
+                        inBracket = false;
+                    }
+                }
+                else if (c == '.' && !inBracket)
+                {
+                    // 非索引段的分隔符
+                    if (buffer.Count > 0)
+                    {
+                        segments.Add(new string(buffer.ToArray()));
+                        buffer.Clear();
+                    }
+                }
+                else
+                {
+                    // 收集字符到缓冲区
+                    if (inBracket) bracketBuffer.Add(c);
+                    else buffer.Add(c);
+                }
+            }
+
+            // 处理剩余字符
+            if (buffer.Count > 0) segments.Add(new string(buffer.ToArray()));
+
+            var result = new List<PathSegment>();
+            foreach (var seg in segments)
+            {
+                if (seg.StartsWith('[') && seg.EndsWith(']'))
+                {
+                    // 索引段
+                    var indices = seg[1..^1].Split(':').Select(int.Parse).ToArray();
+                    result.Add(new IndexSegment(indices));
+                }
+                else
+                {
+                    // 字段段
+                    result.Add(new FieldSegment(seg));
+                }
+            }
+
+            if (result.Count != segments.Count)
+            {
+                throw new InvalidDataException("Invalid path format");
+            }
+
+            return result;
+        }
     }
 }
