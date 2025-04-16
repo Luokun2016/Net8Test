@@ -10,7 +10,7 @@ namespace TagParseUtility.NodeParse
     {
         public string TagPath { get; set; }
 
-        public string OrigonType { get; set; }
+        public string OriginType { get; set; }
 
         public string FsuType { get; set; }
 
@@ -43,7 +43,7 @@ namespace TagParseUtility.NodeParse
                         subItem.TagPath = $"[{string.Join(":", indices)}]{joinChar}{subItem.TagPath}";
                         if (basicTypeNode != null)
                         {
-                            subItem.OrigonType = basicTypeNode.OriginType;
+                            subItem.OriginType = basicTypeNode.OriginType;
                             subItem.FsuType = basicTypeNode.FSUType;
                         }
                         yield return subItem;
@@ -58,7 +58,7 @@ namespace TagParseUtility.NodeParse
 
                     if (basicTypeNode != null)
                     {
-                        tagInfo.OrigonType = basicTypeNode.OriginType;
+                        tagInfo.OriginType = basicTypeNode.OriginType;
                         tagInfo.FsuType = basicTypeNode.FSUType;
                     }
 
@@ -94,7 +94,7 @@ namespace TagParseUtility.NodeParse
 
                     if (item.Value is BasicTypeNode basicTypeNode)
                     {
-                        tagInfo.OrigonType = basicTypeNode.OriginType;
+                        tagInfo.OriginType = basicTypeNode.OriginType;
                         tagInfo.FsuType = basicTypeNode.FSUType;
                     }
 
@@ -119,7 +119,7 @@ namespace TagParseUtility.NodeParse
 
         public IEnumerable<TagInfoVisitor> GetBasicTagInfo(string name, BasicTypeNode? basicNode)
         {
-            return new List<TagInfoVisitor> { new TagInfoVisitor { TagPath = name, OrigonType = basicNode?.OriginType, FsuType = basicNode?.FSUType } };
+            return new List<TagInfoVisitor> { new TagInfoVisitor { TagPath = name, OriginType = basicNode?.OriginType, FsuType = basicNode?.FSUType } };
         }
     }
 }

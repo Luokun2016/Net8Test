@@ -157,7 +157,7 @@ namespace TagParseUtility
                     {
                         Index = index++,
                         Path = tagInfo.TagPath,
-                        OrigonType = tagInfo.OrigonType,
+                        OrigonType = tagInfo.OriginType,
                         FsuType = tagInfo.FsuType
                     });
                 }

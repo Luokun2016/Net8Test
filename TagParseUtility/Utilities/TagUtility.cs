@@ -73,69 +73,61 @@ namespace TagParseUtility.Utilities
         public static List<PathSegment> Parse(string path)
         {
             var segments = new List<string>();
-            var buffer = new List<char>();
-            var inBracket = false;
-            var bracketBuffer = new List<char>();
+            var currentSegment = new StringBuilder();
+            var bracketSegment = new StringBuilder();
+
+            bool inBracket = false;
 
             foreach (var c in path)
             {
-                if (c == '[')
+                switch (c)
                 {
-                    // 遇到左括号，开始收集索引段
-                    if (buffer.Count > 0)
-                    {
-                        segments.Add(new string(buffer.ToArray()));
-                        buffer.Clear();
-                    }
-                    inBracket = true;
-                    bracketBuffer.Clear();
-                }
-                else if (c == ']')
-                {
-                    // 遇到右括号，结束索引段并处理
-                    if (inBracket)
-                    {
-                        // 将冒号替换为逗号，并包装成 [1,2,3] 格式
-                        segments.Add($"[{new string(bracketBuffer.ToArray())}]");
-                        bracketBuffer.Clear();
-                        inBracket = false;
-                    }
-                }
-                else if (c == '.' && !inBracket)
-                {
-                    // 非索引段的分隔符
-                    if (buffer.Count > 0)
-                    {
-                        segments.Add(new string(buffer.ToArray()));
-                        buffer.Clear();
-                    }
-                }
-                else
-                {
-                    // 收集字符到缓冲区
-                    if (inBracket) bracketBuffer.Add(c);
-                    else buffer.Add(c);
+                    case '[':
+                        // 开始收集索引段
+                        AddSegmentIfNotEmpty(segments, currentSegment);
+                        inBracket = true;
+                        break;
+
+                    case ']':
+                        // 结束索引段
+                        if (inBracket)
+                        {
+                            segments.Add($"[{bracketSegment}]");
+                            bracketSegment.Clear();
+                            inBracket = false;
+                        }
+                        break;
+
+                    case '.':
+                        // 分隔符处理
+                        if (!inBracket)
+                        {
+                            AddSegmentIfNotEmpty(segments, currentSegment);
+                        }
+                        else
+                        {
+                            bracketSegment.Append(c);
+                        }
+                        break;
+
+                    default:
+                        // 收集字符
+                        if (inBracket)
+                        {
+                            bracketSegment.Append(c);
+                        }
+                        else
+                        {
+                            currentSegment.Append(c);
+                        }
+                        break;
                 }
             }
 
             // 处理剩余字符
-            if (buffer.Count > 0) segments.Add(new string(buffer.ToArray()));
+            AddSegmentIfNotEmpty(segments, currentSegment);
 
-            var result = new List<PathSegment>();
-            foreach (var seg in segments)
-            {
-                if (seg.StartsWith('[') && seg.EndsWith(']'))
-                {
-                    // 索引段
-                    var indices = seg[1..^1].Split(':').Select(int.Parse).ToArray();
-                    result.Add(new IndexSegment(indices));
-                }
-                else
-                {
-                    // 字段段
-                    result.Add(new FieldSegment(seg));
-                }
-            }
+            var result = segments.Select(ParseSegment).ToList();
 
             if (result.Count != segments.Count)
             {
@@ -143,6 +135,30 @@ namespace TagParseUtility.Utilities
             }
 
             return result;
+        }
+
+        private static void AddSegmentIfNotEmpty(List<string> segments, StringBuilder segmentBuilder)
+        {
+            if (segmentBuilder.Length > 0)
+            {
+                segments.Add(segmentBuilder.ToString());
+                segmentBuilder.Clear();
+            }
+        }
+
+        private static PathSegment ParseSegment(string segment)
+        {
+            if (segment.StartsWith('[') && segment.EndsWith(']'))
+            {
+                // 索引段
+                var indices = segment[1..^1].Split(':').Select(int.Parse).ToArray();
+                return new IndexSegment(indices);
+            }
+            else
+            {
+                // 字段段
+                return new FieldSegment(segment);
+            }
         }
     }
 }
